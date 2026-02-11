@@ -1,0 +1,47 @@
+defaults:
+  - _self_
+
+mode: 'analyze'  # 'train', 'analyze'
+
+general:
+  camera: 'centric_angle'  # 'world', 'birdseye'
+  u0: 0.0
+  Nlength: 300
+  r_cost_weight: 0.0
+  qx0: -0.375
+  qx1: -0.2
+
+train:
+  max_iter: 30
+  start_learning_rate: 1e-1
+  tol: 1e-6
+
+analyze:
+  u0_range: 10.0  # Set to 10 to get values in [-5, 5]
+  u0_resolution: 200
+
+xml:
+  path: './experiments/xml'
+  system: 'billiard_nogravity'
+  overwrite:
+    opt:
+      timestep: 0.01
+      iterations: 2
+      ls_iterations: 10
+      tolerance: 1e-8
+      impratio: 1.0
+      softjax_mode: 'hard'
+      col_soft_enable: False
+      cfd_enable: True
+      cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
+      scan_loop: True
+
+diffrax:
+  solver: 'Tsit5'
+  stepsize_controller: 'PID'
+  pid_atol: 1e-4
+  pid_rtol: 1e-4
+  max_ode_steps: 4096
+  approximate_integration: false
+  adjoint: 'Backsolve'
+  recursive_ncheckpoints: 256

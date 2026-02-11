@@ -1,0 +1,242 @@
+defaults:
+  - _self_
+
+u0s: [-2.0]
+systems: ['cube']
+force_overwrite: True
+
+analyze:
+  camera: 'track'
+  dt: 1.0
+  r_cost_weight: 0.0
+  initial_conditions:
+    qz0: 0.2
+    vy0: -0.1
+
+xml:
+  path: './experiments/xml'
+  overwrite:
+    opt:
+      timestep: 0.01
+      iterations: 4
+      ls_iterations: 10
+      tolerance: 1e-8
+      impratio: 1.0
+      col_soft_enable: True
+      softjax_mode: 'hard'
+      cfd_enable: True
+      cfd_solimp: [0.0, 0.01, 0.05, 1.0, 2.0]
+      scan_loop: True
+
+  overwrite_settings:
+    # --- Diffrax adaptive: Tsit5 + PID at varying tolerances ---
+    dfx_tsit5_1e-10_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-10
+        pid_rtol: 1e-10
+        adjoint: 'RecursiveCheckpoint'
+    dfx_tsit5_1e-7_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-7
+        pid_rtol: 1e-7
+        adjoint: 'RecursiveCheckpoint'
+    dfx_tsit5_1e-5_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+    dfx_tsit5_1e-4_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-4
+        pid_rtol: 1e-4
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Tsit5 + PID approximate integration ---
+    dfx_tsit5approx_1e-8_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: true
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-8
+        pid_rtol: 1e-8
+        adjoint: 'RecursiveCheckpoint'
+    dfx_tsit5approx_1e-5_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: true
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Dopri8 ---
+    dfx_dopri8_1e-10_tol:
+      diffrax:
+        solver: 'Dopri8'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-10
+        pid_rtol: 1e-10
+        adjoint: 'RecursiveCheckpoint'
+    dfx_dopri8_1e-6_tol:
+      diffrax:
+        solver: 'Dopri8'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-6
+        pid_rtol: 1e-6
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Dopri5 ---
+    dfx_dopri5_1e-10_tol:
+      diffrax:
+        solver: 'Dopri5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-10
+        pid_rtol: 1e-10
+        adjoint: 'RecursiveCheckpoint'
+    dfx_dopri5_1e-5_tol:
+      diffrax:
+        solver: 'Dopri5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Bosh3 ---
+    # dfx_bosh3_1e-5_tol:
+    #   diffrax:
+    #     solver: 'Bosh3'
+    #     stepsize_controller: 'PID'
+    #     max_ode_steps: 10000
+    #     approximate_integration: false
+    #     recursive_ncheckpoints: 256
+    #     pid_atol: 1e-5
+    #     pid_rtol: 1e-5
+    #     adjoint: 'RecursiveCheckpoint'
+    # dfx_bosh3_1e-3_tol:
+    #   diffrax:
+    #     solver: 'Bosh3'
+    #     stepsize_controller: 'PID'
+    #     max_ode_steps: 10000
+    #     approximate_integration: false
+    #     recursive_ncheckpoints: 256
+    #     pid_atol: 1e-3
+    #     pid_rtol: 1e-3
+    #     adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Heun ---
+    dfx_heun_1e-5_tol:
+      diffrax:
+        solver: 'Heun'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+    dfx_heun_1e-3_tol:
+      diffrax:
+        solver: 'Heun'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-3
+        pid_rtol: 1e-3
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax Euler constant step ---
+    dfx_euler_1e3_steps:
+      diffrax:
+        solver: 'Euler'
+        stepsize_controller: 'Constant'
+        max_ode_steps: 1000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        adjoint: 'RecursiveCheckpoint'
+    dfx_euler_1e4_steps:
+      diffrax:
+        solver: 'Euler'
+        stepsize_controller: 'Constant'
+        max_ode_steps: 10000
+        approximate_integration: false
+        recursive_ncheckpoints: 256
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax Tsit5 with Backsolve adjoint ---
+    dfx_tsit5_backsolve_1e-7_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        approximate_integration: true
+        recursive_ncheckpoints: 256
+        pid_atol: 1e-7
+        pid_rtol: 1e-7
+        adjoint: 'Backsolve'
+
+    # --- MJX native (skipped at runtime) ---
+    mjx_euler_1e-2_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
+    mjx_euler_1e-3_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001
+    mjx_euler_1e-4_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0001
+    mjx_rk4_1e-2_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
+    mjx_rk4_1e-3_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001
+    mjx_implicit_1e-2_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
+    mjx_implicit_1e-3_timestep:
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001

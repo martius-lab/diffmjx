@@ -1,0 +1,89 @@
+<mujoco model="billiard">
+    <visual>
+        <quality shadowsize="4096" />
+        <global offwidth="800" offheight="800" />
+        <rgba haze="1 1 1 1" />
+        <headlight ambient="0.5 0.5 0.5" diffuse="0.6 0.6 0.6" specular="0.5 0.5 0.5" />
+    </visual>
+
+    <default>
+        <geom solimp="0.9 0.95 0.01 0.5 2" solref="0.01 0.2" condim="3"/>
+    </default> 
+
+    <option impratio="10" iterations="1" ls_iterations="4" timestep="0.001">
+        <flag warmstart="enable" refsafe="disable" eulerdamp="disable"/>
+    </option>
+
+    <custom>
+        <numeric data="15" name="max_contact_points"/>
+        <numeric data="15" name="max_geom_pairs"/>
+    </custom>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="1. 1. 1." rgb2="1. 1. 1." width="32" height="512"/>
+
+
+        <!-- Green Felt Table Texture -->
+        <texture name="felt" type="2d" builtin="flat" rgb1="0.05 0.4 0.05" rgb2="0.05 0.4 0.05" width="512" height="512"/>
+        <material name="felt" texture="felt" texuniform="true" reflectance="0.1" rgba="0.1 0.5 0.1 1"/>
+
+        <!-- Wooden Cushion Texture -->
+        <texture name="wood" type="2d" builtin="checker" rgb1="0.4 0.2 0.1" rgb2="0.3 0.15 0.07" width="128" height="128"/>
+        <material name="wood" texture="wood" texrepeat="3 3" texuniform="true" reflectance="0.2" rgba="0.4 0.2 0.1 1"/>
+
+        <!-- Cue Ball with Rolling Marker (Red & White Checker) -->
+        <texture name="cue_ball" type="cube" builtin="flat" mark="cross" width="64" height="64" rgb1="0.9 0.9 0.9" rgb2="0.9 0.9 0.9" markrgb="0. 0. 0."/>
+        <material name="cue_ball" texture="cue_ball" texuniform="true" rgba="1 1 1 1." reflectance="0.7"/>
+        <!--
+        <texture name="cue_ball" type="2d" builtin="checker" rgb1="1 1 1" rgb2="0.8 0.8 0.8" width="64" height="64"/>
+        <material name="cue_ball" texture="cue_ball" texuniform="true" specular="0.8" shininess="1.0" rgba="1 1 1 1"/>
+        -->
+
+        <!-- Eight Ball with Stripe (Black & White Checker) -->
+        <texture name="eight_ball" type="cube" builtin="flat" mark="cross" width="64" height="64" rgb1="0.1 0.1 0.1" rgb2="0.1 0.1 0.1" markrgb="1 1 1"/>
+        <material name="eight_ball" texture="eight_ball" texuniform="true" rgba="1 1 1 1."/>
+        <!--
+        <texture name="eight_ball" type="2d" builtin="checker" rgb1="0.1 0.1 0.1" rgb2="1 1 1" width="64" height="32"/>
+        <material name="eight_ball" texture="eight_ball" texuniform="true" specular="0.8" shininess="1.0" rgba="0.1 0.1 0.1 1"/>
+        -->
+    </asset>
+
+    <worldbody>
+        <!-- Billiard Table Surface -->
+        <geom name="table" type="plane" material="felt" size="1.2 0.6 0.02" pos="0 0 -0.015" contype="1" conaffinity="2"/>
+
+        <!-- Wooden Cushions -->
+        <geom name="cushion1" type="box" material="wood" size="1.25 0.05 0.05" pos="0 0.65 0.025"/>
+        <geom name="cushion2" type="box" material="wood" size="1.25 0.05 0.05" pos="0 -0.65 0.025"/>
+        <geom name="cushion3" type="box" material="wood" size="0.05 0.6 0.05" pos="1.2 0 0.025"/>
+        <geom name="cushion4" type="box" material="wood" size="0.05 0.6 0.05" pos="-1.2 0 0.025"/>
+
+        <!-- Lighting -->
+        <light directional="true" diffuse="0.5 0.5 0.5" specular="0.4 0.4 0.4" pos="0 0 3" dir="0 0 -1"/>
+        <light directional="true" diffuse="0.4 0.4 0.4" specular="0.2 0.2 0.2" pos="0.2 0.2 3" dir="-1 -1 -1"/>
+
+        <!-- Cameras -->
+        <camera name="centric_angle" pos="-1.956 -0.019 1.330" xyaxes="-0.001 -1.000 -0.000 0.665 -0.000 0.747"/>
+        <camera name="side_angle" pos="0.012 -2.497 1.323" xyaxes="1.000 -0.000 -0.000 0.000 0.449 0.894"/>
+        <!--<camera name="side_angle" pos="-1 1 0.5" xyaxes="0.7 -0.7 0 -0.2 -0.2 0.95"/>-->
+        <camera name="birdseye_close" pos="0 0 1.2" xyaxes="1 0 0 0 1 0"/>
+        <camera name="birdseye" pos="0.000 -0.040 2.295" xyaxes="1.000 0.003 0.000 -0.003 1.000 0.017"/>
+
+        <!-- Cue Ball with Red & White Checker Pattern -->
+        <body name="cue_ball" pos="-0.375 0 0.1">
+            <joint type="free" damping="0.0001"/>
+            <geom name="cue_geom" type="sphere" size="0.042" material="cue_ball" mass="0.17" contype="7" friction="0.2 0.01 0.01"/>
+        </body>
+
+        <!-- Eight Ball with Black & White Stripe -->
+        <body name="eight_ball" pos="-0.2 0 0.1">
+            <joint type="free" damping="0.0001"/>
+            <geom name="eight_geom" type="sphere" size="0.042" material="eight_ball" mass="0.17" contype="7" friction="0.2 0.01 0.01"/>
+        </body>
+
+        <!-- Mocap Target -->
+        <body mocap="true" name="mocap_target">
+            <geom type="sphere" size="0.025" rgba="1 0 0 1" contype="0" conaffinity="0"/>
+        </body>
+    </worldbody>
+</mujoco>

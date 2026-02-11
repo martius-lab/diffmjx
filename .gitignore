@@ -20,7 +20,9 @@ build/
 build_cmake/
 python/dist/
 doc/_build
-external/
+outputs/
+results/
+wandb/
 
 # Exclude macOS folder attributes
 .DS_Store
