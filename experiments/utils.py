@@ -1,12 +1,11 @@
 import time
 from collections.abc import MutableMapping
 from os.path import join
-
+from omegaconf import OmegaConf
 from jax import Array
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-
 import mediapy
 import mujoco
 from tqdm import tqdm
@@ -103,8 +102,6 @@ def flatten(dictionary, parent_key="", separator="."):
 
 
 def cfg_to_flat_dct(cfg, resolve: bool = True):
-    from omegaconf import OmegaConf
-
     cfg_dct = OmegaConf.to_container(cfg, resolve=resolve)
     flat_cfg_dct = flatten(cfg_dct)
     return flat_cfg_dct

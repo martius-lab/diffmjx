@@ -33,7 +33,7 @@ xml:
       impratio: 1.0
       cfd_enable: True # general switch for disabling any modification.
       col_soft_enable: False
-      softjax_mode: 'hard'  # Mode for soft surrogate function in collision handling.
+      softjax_mode: 'entropic' # 'c1', 'c2', 'c4', 'smooth' - Mode for soft surrogates in collision detection.
       cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
       scan_loop: True
 

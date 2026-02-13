@@ -17,7 +17,8 @@ train:
   tol: 1e-6
 
 analyze:
-  u0_range: 10.0  # Set to 10 to get values in [-5, 5]
+  u0_min: -5.0
+  u0_max: 5.0
   u0_resolution: 200
 
 xml:
@@ -30,7 +31,7 @@ xml:
       ls_iterations: 10
       tolerance: 1e-8
       impratio: 1.0
-      softjax_mode: 'hard'
+      softjax_mode: 'entropic'
       col_soft_enable: False
       cfd_enable: True
       cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
