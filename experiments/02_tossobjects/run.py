@@ -44,10 +44,15 @@ def main(cfg):
 
     diffrax_cfg = mjx_diffrax.DiffraxConfig(**cfg.diffrax)  # Set integration parameters for Diffrax
 
+    if cfg.diffrax.mjx_timestep is not None:
+        Nlength = int(cfg.simulation_time / cfg.diffrax.mjx_timestep)
+    else:
+        Nlength = int(cfg.simulation_time / m.opt.timestep)
+
     # Render initial condition examples
     for ui in [u0s[0], u0s[len(u0s) // 2], u0s[-1]]:
         d_i = d.replace(qvel=d.qvel.at[2].set(ui))
-        _, traj_data = mjx_diffrax.multistep(m, d_i, nsteps=cfg.Nlength, cfg=diffrax_cfg, ctrls=None)
+        _, traj_data = mjx_diffrax.multistep(m, d_i, nsteps=Nlength, cfg=diffrax_cfg, ctrls=None)
         render_trajectory(traj=traj_data, m=mj_model, path=str(RESULTS_DIR), name=f"{cfg.xml.system}_toss_u0={float(ui):.2f}")
 
 
@@ -66,7 +71,7 @@ def main(cfg):
 
     # Compute loss and gradient for all initial conditions
     loss_vmap = eqx.filter_vmap(loss, in_axes=(0, None, None, None, None, None))
-    losses, grads = loss_vmap(u0s, m, d, cfg.r_cost_weight, cfg.Nlength, diffrax_cfg)
+    losses, grads = loss_vmap(u0s, m, d, cfg.r_cost_weight, Nlength, diffrax_cfg)
 
     with open(RESULTS_DIR / f"{cfg.xml.system}.pkl", "wb") as f:
         pickle.dump((u0s, losses, grads), f)

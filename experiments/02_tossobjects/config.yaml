@@ -4,7 +4,7 @@ defaults:
 u0_start: -3.0
 u0_end: -1.0
 u0_resolution: 200
-Nlength: 100
+simulation_time: 0.5  # Total simulation time
 r_cost_weight: 0.0
 qz0: 0.2  # Initial ball height
 vy0: -0.1  # Initial horizontal velocity
@@ -14,21 +14,28 @@ xml:
   system: 'cube' # 'cube', 'sphere', 'cylinder', 'capsule'
   overwrite:
     opt:
-      timestep: 0.01
+      timestep: 0.01  # Simulation timestep (Adaptive integrator will use smaller steps if needed)
       iterations: 4
       ls_iterations: 10
       tolerance: 1e-8
       impratio: 1.0
       cfd_enable: False  # general switch for disabling any modification
-      softjax_mode: 'entropic'  # 'c1', 'c2', 'c4', 'smooth'
-      col_soft_enable: False
+      softjax_mode: 'hard'  # 'c1', 'c2', 'c4', 'smooth'
+      col_soft_enable: True
       scan_loop: True  # Use jax.lax.scan instead of while_loop for differentiable solver
       cfd_solimp: [0.0, 0.01, 0.05, 1.0, 2.0]
 
 diffrax:
-  solver: 'Tsit5'  # Euler, Tsit5
-  stepsize_controller: 'PID'  # Constant, PID
-  max_ode_steps: 1024
-  approximate_integration: false
-  recursive_ncheckpoints: 256
-  adjoint: 'RecursiveCheckpoint'
+  use_mjx: True
+  solver: 'ImplicitFast' # 'Euler', 'RK4', 'ImplicitFast'
+  mjx_timestep: 0.002  # If null uses m.opt.timestep
+
+# diffrax:
+#   solver: 'Tsit5'  # Euler, Tsit5
+#   stepsize_controller: 'PID'  # Constant, PID
+#   max_ode_steps: null
+#   pid_atol: 1e-6
+#   pid_rtol: 1e-6
+#   approximate_integration: false
+#   recursive_ncheckpoints: 256
+#   adjoint: 'RecursiveCheckpoint'
