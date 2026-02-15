@@ -1,8 +1,6 @@
 defaults:
   - _self_
 
-quick: false
-
 v0: -1.0
 q0_min: 0.0
 q0_max: 3.0

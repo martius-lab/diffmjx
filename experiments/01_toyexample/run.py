@@ -46,10 +46,6 @@ def unroll(q0, v0, n_steps, step_fn, h):
 
 @hydra.main(config_path=".", config_name="config", version_base="1.3")
 def main(cfg):
-    if cfg.quick:
-        omegaconf.OmegaConf.update(cfg, "q0_resolution", 20)
-        omegaconf.OmegaConf.update(cfg, "coarse.nsteps", 5)
-        omegaconf.OmegaConf.update(cfg, "fine.nsteps", 200)
     print(f"Starting run with parameters:\n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
     v0 = jnp.array(cfg.v0)
