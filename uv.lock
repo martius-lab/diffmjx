@@ -1754,7 +1754,7 @@ requires-dist = [
     { name = "equinox", specifier = ">=0.13.1" },
     { name = "jax", specifier = ">=0.8.0" },
     { name = "jax", extras = ["cuda12"], marker = "extra == 'gpu'", specifier = ">=0.8.0" },
-    { name = "optimistix" },
+    { name = "optimistix", specifier = ">=0.0.9" },
     { name = "ott-jax", specifier = ">=0.5.0" },
 ]
 provides-extras = ["gpu"]
@@ -1772,6 +1772,7 @@ dev = [
     { name = "mkdocs-material", specifier = ">=9.6.14" },
     { name = "mkdocstrings", specifier = ">=0.29.1" },
     { name = "mkdocstrings-python", specifier = ">=1.16.12" },
+    { name = "pandas" },
     { name = "pymdown-extensions", specifier = ">=10.15" },
     { name = "pytest", specifier = ">=8.2.0" },
     { name = "ruff", specifier = ">=0.11.12" },
