@@ -1,14 +1,16 @@
 import sys
 from pathlib import Path
 
+import hydra
 import jax
+import omegaconf
+import pandas as pd
 from jax import numpy as jnp
 
 # Add parent directory to path for utils import
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils import plot_loss_grads
 
-# Create results directory
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
@@ -42,48 +44,69 @@ def unroll(q0, v0, n_steps, step_fn, h):
     return loss
 
 
-v0 = jnp.array(-1.0)
-q0_values = jnp.linspace(0.0, 3.0, 2000)
+@hydra.main(config_path=".", config_name="config", version_base="1.3")
+def main(cfg):
+    if cfg.quick:
+        omegaconf.OmegaConf.update(cfg, "q0_resolution", 20)
+        omegaconf.OmegaConf.update(cfg, "coarse.nsteps", 5)
+        omegaconf.OmegaConf.update(cfg, "fine.nsteps", 200)
+    print(f"Starting run with parameters:\n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
-h = 0.1
-nsteps = 20
-step_ideal_vmap = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_ideal, h))
-step_penalty_vmap = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_penalty, h))
-loss_ideal, grad_ideal = step_ideal_vmap(q0_values)
-loss_penalty, grad_penalty = step_penalty_vmap(q0_values)
+    v0 = jnp.array(cfg.v0)
+    q0_values = jnp.linspace(cfg.q0_min, cfg.q0_max, cfg.q0_resolution)
 
-h = 0.0001
-nsteps = 20000
-step_ideal_vmap2 = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_ideal, h))
-step_penalty_vmap2 = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_penalty, h))
-loss_ideal2, grad_ideal2 = step_ideal_vmap2(q0_values)
-loss_penalty2, grad_penalty2 = step_penalty_vmap2(q0_values)
+    # Coarse simulation
+    h = cfg.coarse.h
+    nsteps = cfg.coarse.nsteps
+    step_ideal_vmap = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_ideal, h))
+    step_penalty_vmap = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_penalty, h))
+    loss_ideal, grad_ideal = step_ideal_vmap(q0_values)
+    loss_penalty, grad_penalty = step_penalty_vmap(q0_values)
 
-plot_loss_grads(
-    q0_values,
-    loss_ideal,
-    grad_ideal,
-    str(RESULTS_DIR / "ideal_elastic"),
-    xlabel=r"Initial position $q_0$",
-)
-plot_loss_grads(
-    q0_values,
-    loss_penalty,
-    grad_penalty,
-    str(RESULTS_DIR / "penalty_based"),
-    xlabel=r"Initial position $q_0$",
-)
-plot_loss_grads(
-    q0_values,
-    loss_ideal2,
-    grad_ideal2,
-    str(RESULTS_DIR / "ideal_elastic_fine"),
-    xlabel=r"Initial position $q_0$",
-)
-plot_loss_grads(
-    q0_values,
-    loss_penalty2,
-    grad_penalty2,
-    str(RESULTS_DIR / "penalty_based_fine"),
-    xlabel=r"Initial position $q_0$",
-)
+    # Fine simulation
+    h = cfg.fine.h
+    nsteps = cfg.fine.nsteps
+    step_ideal_vmap2 = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_ideal, h))
+    step_penalty_vmap2 = jax.vmap(lambda q0: unroll(q0, v0, nsteps, step_penalty, h))
+    loss_ideal2, grad_ideal2 = step_ideal_vmap2(q0_values)
+    loss_penalty2, grad_penalty2 = step_penalty_vmap2(q0_values)
+
+    # Save raw data
+    df = pd.DataFrame({
+        "q0": q0_values,
+        "loss_ideal": loss_ideal,
+        "grad_ideal": grad_ideal,
+        "loss_penalty": loss_penalty,
+        "grad_penalty": grad_penalty,
+        "loss_ideal_fine": loss_ideal2,
+        "grad_ideal_fine": grad_ideal2,
+        "loss_penalty_fine": loss_penalty2,
+        "grad_penalty_fine": grad_penalty2,
+    })
+    df.to_csv(RESULTS_DIR / "data.csv", index=False)
+    print(f"Data saved to {RESULTS_DIR / 'data.csv'}")
+
+    plot_loss_grads(
+        q0_values, loss_ideal, grad_ideal,
+        str(RESULTS_DIR / "ideal_elastic"),
+        xlabel=r"Initial position $q_0$",
+    )
+    plot_loss_grads(
+        q0_values, loss_penalty, grad_penalty,
+        str(RESULTS_DIR / "penalty_based"),
+        xlabel=r"Initial position $q_0$",
+    )
+    plot_loss_grads(
+        q0_values, loss_ideal2, grad_ideal2,
+        str(RESULTS_DIR / "ideal_elastic_fine"),
+        xlabel=r"Initial position $q_0$",
+    )
+    plot_loss_grads(
+        q0_values, loss_penalty2, grad_penalty2,
+        str(RESULTS_DIR / "penalty_based_fine"),
+        xlabel=r"Initial position $q_0$",
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -2,7 +2,6 @@
 # Simple optimization problem where a ball is thrown at another ball.
 # The first ball shall be thrown in such that the second ball stops at a certain position.
 
-import pickle
 import sys
 from os.path import join
 from pathlib import Path
@@ -11,13 +10,14 @@ import hydra
 import omegaconf
 import jax
 import jax.numpy as jnp
+import numpy as np
+import pandas as pd
 import equinox as eqx
 import optax
 jax.config.update("jax_debug_nans", True)
 jax.config.update("jax_enable_x64", True)
 jax.config.update("jax_default_matmul_precision", "high")
 jax.config.update("jax_disable_jit", False)
-import numpy as np
 
 
 # Add parent directory for local imports
@@ -82,21 +82,23 @@ def train(
     qx1,
     camera,
     cfg_diffrax,
+    render=True,
 ):
     # Initial conditions
     d = d.replace(qpos=d.qpos.at[0].set(qx0).at[7].set(qx1))
 
     # Render initial control
-    render_u0(
-        u0,
-        m,
-        d,
-        mj_model,
-        Nlength,
-        evalname=f"billiard_before_training_u0={u0}",
-        camera=camera,
-        cfg_diffrax=cfg_diffrax,
-    )
+    if render:
+        render_u0(
+            u0,
+            m,
+            d,
+            mj_model,
+            Nlength,
+            evalname=f"billiard_before_training_u0={u0}",
+            camera=camera,
+            cfg_diffrax=cfg_diffrax,
+        )
 
     # Gradient descent
     optimizer = optax.adam(start_learning_rate)
@@ -120,16 +122,17 @@ def train(
             break
 
     # Render best control
-    render_u0(
-        u0_best,
-        m,
-        d,
-        mj_model,
-        Nlength,
-        evalname=f"billiard_after_training_u0={u0_best}",
-        camera=camera,
-        cfg_diffrax=cfg_diffrax,
-    )
+    if render:
+        render_u0(
+            u0_best,
+            m,
+            d,
+            mj_model,
+            Nlength,
+            evalname=f"billiard_after_training_u0={u0_best}",
+            camera=camera,
+            cfg_diffrax=cfg_diffrax,
+        )
 
 
 def analyze(
@@ -146,26 +149,36 @@ def analyze(
     qx1,
     camera,
     cfg_diffrax,
+    render=True,
 ):
     d = d.replace(qpos=d.qpos.at[0].set(qx0).at[7].set(qx1))
     u0s = jnp.linspace(u0_min, u0_max, u0_resolution)
 
-    render_u0(u0, m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0}", camera=camera, cfg_diffrax=cfg_diffrax)
-    render_u0(u0s[0], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[0]}", camera=camera, cfg_diffrax=cfg_diffrax)
-    render_u0(u0s[-1], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[-1]}", camera=camera, cfg_diffrax=cfg_diffrax)
+    if render:
+        render_u0(u0, m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0}", camera=camera, cfg_diffrax=cfg_diffrax)
+        render_u0(u0s[0], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[0]}", camera=camera, cfg_diffrax=cfg_diffrax)
+        render_u0(u0s[-1], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[-1]}", camera=camera, cfg_diffrax=cfg_diffrax)
 
     loss_vmap = eqx.filter_vmap(loss, in_axes=(0, None, None, None, None, None))
     losses, grads = loss_vmap(u0s, m, d, Nlength, r_cost_weight, cfg_diffrax)
 
     u0s, losses, grads = np.array(u0s), np.array(losses), np.array(grads)
-    with open(RESULTS_DIR / "billiard_analyze.pkl", "wb") as f:
-        pickle.dump((u0s, losses, grads), f)
+    pd.DataFrame({
+        "u0s": u0s,
+        "losses": losses,
+        "grads": grads,
+    }).to_csv(RESULTS_DIR / "billiard_analyze.csv", index=False)
+    print(f"Data saved to {RESULTS_DIR / 'billiard_analyze.csv'}")
 
     plot_loss_grads(u0s, losses, grads, figpath=str(RESULTS_DIR / "billiard_analyze"))
 
 
 @hydra.main(config_path=".", config_name="config", version_base="1.3")
 def main(cfg):
+    if cfg.quick:
+        omegaconf.OmegaConf.update(cfg, "general.Nlength", 10)
+        omegaconf.OmegaConf.update(cfg, "analyze.u0_resolution", 5)
+        omegaconf.OmegaConf.update(cfg, "train.max_iter", 2)
     print(f"Starting run with parameters: \n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
     local_path = join(cfg.xml.path, cfg.xml.system + ".xml")
@@ -184,9 +197,9 @@ def main(cfg):
     diffrax_cfg = mjx_diffrax.DiffraxConfig(**cfg.diffrax)
 
     if cfg.mode == "train":
-        train(m, d, mj_model, **cfg.train, **cfg.general, cfg_diffrax=diffrax_cfg)
+        train(m, d, mj_model, **cfg.train, **cfg.general, cfg_diffrax=diffrax_cfg, render=cfg.render)
     elif cfg.mode == "analyze":
-        analyze(m, d, mj_model, **cfg.analyze, **cfg.general, cfg_diffrax=diffrax_cfg)
+        analyze(m, d, mj_model, **cfg.analyze, **cfg.general, cfg_diffrax=diffrax_cfg, render=cfg.render)
 
 
 if __name__ == "__main__":

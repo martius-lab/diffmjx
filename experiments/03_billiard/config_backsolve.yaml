@@ -31,7 +31,7 @@ xml:
       ls_iterations: 10
       tolerance: 1e-8
       impratio: 1.0
-      softjax_mode: 'entropic'
+      softjax_mode: 'smooth'
       col_soft_enable: False
       cfd_enable: True
       cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
@@ -43,6 +43,6 @@ diffrax:
   pid_atol: 1e-4
   pid_rtol: 1e-4
   max_ode_steps: 4096
-  approximate_integration: false
+  exact_quat_integration: true
   adjoint: 'Backsolve'
   recursive_ncheckpoints: 256

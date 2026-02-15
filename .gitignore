@@ -40,3 +40,9 @@ MUJOCO_LOG.TXT
 
 # Clang cache
 .cache/
+
+# External dependencies (cloned via setup.sh)
+external/
+
+# Virtual environment
+.venv/

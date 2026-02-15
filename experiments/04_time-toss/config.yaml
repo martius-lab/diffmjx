@@ -1,6 +1,8 @@
 defaults:
   - _self_
 
+quick: false
+render: true
 u0s: [-2.0]
 systems: ['cube']
 force_overwrite: True
@@ -22,7 +24,7 @@ xml:
       impratio: 1.0
 
       col_soft_enable: True
-      softjax_mode: 'entropic'  # 'c1', 'c2', 'c4', 'smooth' 
+      softjax_mode: 'smooth'  # 'c1', 'c2', 'c4', 'smooth'
       cfd_enable: True
       cfd_solimp: [0.0, 0.01, 0.05, 1.0, 2.0]
       scan_loop: True  # Use scan in contact solver.
@@ -34,7 +36,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -44,7 +46,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-7
         pid_rtol: 1e-7
@@ -54,7 +56,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -64,7 +66,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-4
         pid_rtol: 1e-4
@@ -76,7 +78,7 @@ xml:
         solver: 'Dopri8'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -86,7 +88,7 @@ xml:
         solver: 'Dopri8'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-6
         pid_rtol: 1e-6
@@ -98,7 +100,7 @@ xml:
         solver: 'Dopri5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -108,33 +110,77 @@ xml:
         solver: 'Dopri5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-5
         pid_rtol: 1e-5
         adjoint: 'RecursiveCheckpoint'
 
     # --- Diffrax adaptive: Bosh3 ---
-    # dfx_bosh3_1e-5_tol:
-    #   diffrax:
-    #     solver: 'Bosh3'
-    #     stepsize_controller: 'PID'
-    #     max_ode_steps: 10000
-    #     approximate_integration: false
-    #     recursive_ncheckpoints: null
-    #     pid_atol: 1e-5
-    #     pid_rtol: 1e-5
-    #     adjoint: 'RecursiveCheckpoint'
-    # dfx_bosh3_1e-3_tol:
-    #   diffrax:
-    #     solver: 'Bosh3'
-    #     stepsize_controller: 'PID'
-    #     max_ode_steps: 10000
-    #     approximate_integration: false
-    #     recursive_ncheckpoints: null
-    #     pid_atol: 1e-3
-    #     pid_rtol: 1e-3
-    #     adjoint: 'RecursiveCheckpoint'
+    dfx_bosh3_1e-5_tol:
+      diffrax:
+        solver: 'Bosh3'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+    dfx_bosh3_1e-3_tol:
+      diffrax:
+        solver: 'Bosh3'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-3
+        pid_rtol: 1e-3
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Midpoint ---
+    dfx_midpoint_1e-5_tol:
+      diffrax:
+        solver: 'Midpoint'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+    dfx_midpoint_1e-3_tol:
+      diffrax:
+        solver: 'Midpoint'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-3
+        pid_rtol: 1e-3
+        adjoint: 'RecursiveCheckpoint'
+
+    # --- Diffrax adaptive: Ralston ---
+    dfx_ralston_1e-5_tol:
+      diffrax:
+        solver: 'Ralston'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-5
+        pid_rtol: 1e-5
+        adjoint: 'RecursiveCheckpoint'
+    dfx_ralston_1e-3_tol:
+      diffrax:
+        solver: 'Ralston'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-3
+        pid_rtol: 1e-3
+        adjoint: 'RecursiveCheckpoint'
 
     # --- Diffrax adaptive: Heun ---
     dfx_heun_1e-5_tol:
@@ -142,7 +188,7 @@ xml:
         solver: 'Heun'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -152,7 +198,7 @@ xml:
         solver: 'Heun'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         pid_atol: 1e-3
         pid_rtol: 1e-3
@@ -165,7 +211,7 @@ xml:
         solver: 'Euler'
         stepsize_controller: 'Constant'
         max_ode_steps: null
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         adjoint: 'RecursiveCheckpoint'
 
@@ -175,7 +221,7 @@ xml:
         solver: 'Euler'
         stepsize_controller: 'Constant'
         max_ode_steps: null
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
         adjoint: 'RecursiveCheckpoint'
 
@@ -185,19 +231,8 @@ xml:
         solver: 'Euler'
         stepsize_controller: 'Constant'
         max_ode_steps: null
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: null
-        adjoint: 'RecursiveCheckpoint'
-
-    dfx_tsit5__1e-7_tol:
-      diffrax:
-        solver: 'Tsit5'
-        stepsize_controller: 'PID'
-        max_ode_steps: 10000
-        approximate_integration: true
-        recursive_ncheckpoints: null
-        pid_atol: 1e-7
-        pid_rtol: 1e-7
         adjoint: 'RecursiveCheckpoint'
 
     # --- MJX native: Euler ---

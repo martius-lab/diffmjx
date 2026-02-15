@@ -104,6 +104,8 @@ def analyze(
 
 @hydra.main(config_path=".", config_name="config", version_base="1.3")
 def main(cfg):
+    if cfg.quick:
+        omegaconf.OmegaConf.update(cfg, "analyze.dt", 0.1)
     print(f"Starting run with parameters: \n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
     columns = ["loss", "grad", "grad_fd", "jit_time_fw", "runtime_fw", "jit_time_bw", "runtime_bw"]
@@ -121,7 +123,11 @@ def main(cfg):
         else:
             df = pd.DataFrame(columns=columns)
 
-        for setting_name, setting in cfg.xml.overwrite_settings.items():
+        settings = list(cfg.xml.overwrite_settings.items())
+        if cfg.quick:
+            settings = settings[:1]
+
+        for setting_name, setting in settings:
             # Skip MJX-native settings (not supported by mjx_diffrax)
             if setting.get("integrator") == "MJX":
                 print(f"Skipping MJX-native setting: {setting_name}")
@@ -143,7 +149,7 @@ def main(cfg):
             m = m.tree_replace(overwrite_config)
 
             cfg_diffrax = mjx_diffrax.DiffraxConfig(**setting.diffrax)
-            render_video = "1e-10" in setting_name
+            render_video = cfg.render and "1e-10" in setting_name
 
             (
                 loss_val,

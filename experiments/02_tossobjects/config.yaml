@@ -1,6 +1,8 @@
 defaults:
   - _self_
 
+quick: false
+render: true
 u0_start: -3.0
 u0_end: -1.0
 u0_resolution: 200
@@ -36,6 +38,6 @@ diffrax:
 #   max_ode_steps: null
 #   pid_atol: 1e-6
 #   pid_rtol: 1e-6
-#   approximate_integration: false
+#   exact_quat_integration: true
 #   recursive_ncheckpoints: 256
 #   adjoint: 'RecursiveCheckpoint'

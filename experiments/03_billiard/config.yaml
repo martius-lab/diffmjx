@@ -1,6 +1,8 @@
 defaults:
   - _self_
 
+quick: false
+render: true
 mode: 'analyze'  # 'train', 'analyze'
 
 general:
@@ -33,7 +35,7 @@ xml:
       impratio: 1.0
       cfd_enable: True # general switch for disabling any modification.
       col_soft_enable: False
-      softjax_mode: 'entropic' # 'c1', 'c2', 'c4', 'smooth' - Mode for soft surrogates in collision detection.
+      softjax_mode: 'smooth' # 'c1', 'c2', 'c4', 'smooth' - Mode for soft surrogates in collision detection.
       cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
       scan_loop: True
 
@@ -43,6 +45,6 @@ diffrax:
   pid_atol: 1e-4
   pid_rtol: 1e-4
   max_ode_steps: 4096
-  approximate_integration: false
+  exact_quat_integration: true
   adjoint: 'RecursiveCheckpoint'
-  recursive_ncheckpoints: None
+  recursive_ncheckpoints: null

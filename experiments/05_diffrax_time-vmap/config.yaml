@@ -1,6 +1,8 @@
 defaults:
   - _self_
 
+quick: false
+render: true
 force_overwrite: True
 
 analyze:
@@ -30,7 +32,7 @@ diffrax:
   solver: 'Tsit5'
   stepsize_controller: 'PID'
   max_ode_steps: 1024
-  approximate_integration: false
+  exact_quat_integration: true
   recursive_ncheckpoints: 256
   pid_atol: 1e-5
   pid_rtol: 1e-5

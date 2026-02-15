@@ -1,6 +1,8 @@
 defaults:
   - _self_
 
+quick: false
+render: true
 u0s: [-2.0]
 systems: ['cube']
 force_overwrite: True
@@ -35,7 +37,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -45,7 +47,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-7
         pid_rtol: 1e-7
@@ -55,7 +57,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -65,7 +67,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-4
         pid_rtol: 1e-4
@@ -77,7 +79,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: true
+        exact_quat_integration: false
         recursive_ncheckpoints: 256
         pid_atol: 1e-8
         pid_rtol: 1e-8
@@ -87,7 +89,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: true
+        exact_quat_integration: false
         recursive_ncheckpoints: 256
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -99,7 +101,7 @@ xml:
         solver: 'Dopri8'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -109,7 +111,7 @@ xml:
         solver: 'Dopri8'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-6
         pid_rtol: 1e-6
@@ -121,7 +123,7 @@ xml:
         solver: 'Dopri5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-10
         pid_rtol: 1e-10
@@ -131,7 +133,7 @@ xml:
         solver: 'Dopri5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -143,7 +145,7 @@ xml:
     #     solver: 'Bosh3'
     #     stepsize_controller: 'PID'
     #     max_ode_steps: 10000
-    #     approximate_integration: false
+    #     exact_quat_integration: true
     #     recursive_ncheckpoints: 256
     #     pid_atol: 1e-5
     #     pid_rtol: 1e-5
@@ -153,7 +155,7 @@ xml:
     #     solver: 'Bosh3'
     #     stepsize_controller: 'PID'
     #     max_ode_steps: 10000
-    #     approximate_integration: false
+    #     exact_quat_integration: true
     #     recursive_ncheckpoints: 256
     #     pid_atol: 1e-3
     #     pid_rtol: 1e-3
@@ -165,7 +167,7 @@ xml:
         solver: 'Heun'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-5
         pid_rtol: 1e-5
@@ -175,7 +177,7 @@ xml:
         solver: 'Heun'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         pid_atol: 1e-3
         pid_rtol: 1e-3
@@ -187,7 +189,7 @@ xml:
         solver: 'Euler'
         stepsize_controller: 'Constant'
         max_ode_steps: 1000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         adjoint: 'RecursiveCheckpoint'
     dfx_euler_1e4_steps:
@@ -195,7 +197,7 @@ xml:
         solver: 'Euler'
         stepsize_controller: 'Constant'
         max_ode_steps: 10000
-        approximate_integration: false
+        exact_quat_integration: true
         recursive_ncheckpoints: 256
         adjoint: 'RecursiveCheckpoint'
 
@@ -205,7 +207,7 @@ xml:
         solver: 'Tsit5'
         stepsize_controller: 'PID'
         max_ode_steps: 10000
-        approximate_integration: true
+        exact_quat_integration: false
         recursive_ncheckpoints: 256
         pid_atol: 1e-7
         pid_rtol: 1e-7

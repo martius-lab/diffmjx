@@ -191,6 +191,10 @@ def analyze(
 
 @hydra.main(config_path=".", config_name="config", version_base="1.3")
 def main(cfg):
+    if cfg.quick:
+        omegaconf.OmegaConf.update(cfg, "analyze.num_spheres", [2])
+        omegaconf.OmegaConf.update(cfg, "analyze.num_batch", [1])
+        omegaconf.OmegaConf.update(cfg, "analyze.dt", 0.01)
     print(f"Starting run with parameters: \n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
     cfg_diffrax = mjx_diffrax.DiffraxConfig(**cfg.diffrax)
