@@ -30,11 +30,12 @@ RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
 
+def set_initial_conditions(d, qz0, vy0):
+    return d.replace(qpos=d.qpos.at[2].set(qz0), qvel=d.qvel.at[1].set(vy0))
+
+
 def loss_fn(u0, m, d, Nlength, r_cost_weight, cfg_diffrax):
     """Sum of running costs."""
-    #val = d[f'{cfg.x0.name}'].at[cfg.x0.idx].set(cfg.x0.val)
-    #d = d.tree_replace({f'{cfg.x0.name}': val})
-    # cost_idx
     d = d.replace(qvel=d.qvel.at[2].set(u0))
     d, ds = mjx_diffrax.multistep(m, d, nsteps=Nlength, cfg=cfg_diffrax)
     
@@ -44,7 +45,7 @@ def loss_fn(u0, m, d, Nlength, r_cost_weight, cfg_diffrax):
     return r_cost_weight * jnp.sum(jax.vmap(cost)(ds)) + cost(d)
 
 
-def render_u0(u0, m, d, mj_model, Nlength, cfg_diffrax, path, name):
+def render_u0(u0, m, d, mj_model, Nlength, cfg_diffrax, path, name, camera):
     """Visualisation for a single force."""
     d_i = d.replace(qvel=d.qvel.at[2].set(u0))
     _, traj_data = mjx_diffrax.multistep(m, d_i, nsteps=Nlength, cfg=cfg_diffrax)
@@ -53,6 +54,7 @@ def render_u0(u0, m, d, mj_model, Nlength, cfg_diffrax, path, name):
         m=mj_model,
         path=path,
         name=name,
+        camera=camera,
     )
 
 
@@ -67,15 +69,15 @@ def analyze(
     u0,
     dt,
     r_cost_weight,
-    qz0,
-    vy0,
+    initial_conditions,
+    camera,
     cfg_diffrax,
     path,
     render_video=False,
 ):
     d = mjx.make_data(m)
     d = jax.tree.map(upscale, d)
-    d = d.replace(qpos=d.qpos.at[2].set(qz0), qvel=d.qvel.at[1].set(vy0))
+    d = set_initial_conditions(d, **initial_conditions)
 
     Nlength = int(dt / m.opt.timestep)
 
@@ -93,7 +95,10 @@ def analyze(
     print(f"Loss: {loss_val}, Gradient: {grad}, Gradient FD: {grad_fd}")
 
     if render_video:
-        render_u0(u0, m, d, mj_model, Nlength, cfg_diffrax, path=path, name=f"{name}_u0={u0}")
+        render_u0(
+            u0, m, d, mj_model, Nlength, cfg_diffrax,
+            path=path, name=f"{name}_u0={u0}", camera=camera,
+        )
 
     return loss_val, grad, grad_fd, jit_time_fw, runtime_fw, jit_time_bw, runtime_bw
 
@@ -124,33 +129,27 @@ def main(cfg):
             settings = settings[:1]
 
         for setting_name, setting in settings:
+            # Skip MJX-native settings (not supported by mjx_diffrax)
+            if setting.get("integrator") == "MJX":
+                print(f"Skipping MJX-native setting: {setting_name}")
+                continue
+
             if setting_name in df.index and not cfg.force_overwrite:
                 print(f"Skipping {setting_name}: already in results")
                 continue
-            
-            # Setup MJX model
+
+            print(f"Analyzing {system} (u0={u0}) with {setting_name}")
+
             m = mjx.put_model(mj_model)
             if m.mesh_convex == ():
                 m = m.replace(mesh_convex=None)
-            m = m.tree_replace(cfg_to_flat_dct(cfg.xml.overwrite))
-            
-            if 'mjx' in setting_name:
-                integrator_map = {
-                    "Euler": mujoco.mjtIntegrator.mjINT_EULER,
-                    "RK4": mujoco.mjtIntegrator.mjINT_RK4,
-                    "ImplicitFast": mujoco.mjtIntegrator.mjINT_IMPLICITFAST,
-                    }
-                cfg_diffrax = None
-                m = m.tree_replace({'opt.integrator': integrator_map[setting.integrator],
-                                    'opt.timestep': setting.timestep})
-            else:
-                cfg_diffrax = mjx_diffrax.DiffraxConfig(**setting.diffrax)
-                
-                # CosntantStepsize controller uses m.timestep as stepsize
-                if cfg_diffrax.stepsize_controller == 'Constant':
-                    m = m.tree_replace({'opt.timestep': setting.timestep})
+            overwrite_config = cfg_to_flat_dct(cfg.xml.overwrite)
+            # Apply per-setting opt overwrites if present
+            if "opt" in setting:
+                overwrite_config.update(cfg_to_flat_dct(setting.opt))
+            m = m.tree_replace(overwrite_config)
 
-            print(f"Analyzing {system} (u0={u0}) with {setting_name}")
+            cfg_diffrax = mjx_diffrax.DiffraxConfig(**setting.diffrax)
 
             render_video = cfg.render and "1e-10" in setting_name
 

@@ -8,10 +8,12 @@ systems: ['cube']
 force_overwrite: True
 
 analyze:
+  camera: track
   dt: 1.0
   r_cost_weight: 0.0
-  qz0: 0.2
-  vy0: -0.1
+  initial_conditions:
+    qz0: 0.2
+    vy0: -0.1
 
 xml:
   path: './experiments/xml'
@@ -206,7 +208,8 @@ xml:
 
     # --- Diffrax Euler constant step ---
     dfx_euler_1e3_steps:
-      timestep: 0.001
+      opt:
+        timestep: 0.001
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
@@ -216,7 +219,8 @@ xml:
         adjoint: 'RecursiveCheckpoint'
 
     dfx_euler_3e3_steps:
-      timestep: 0.003
+      opt:
+        timestep: 0.003
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
@@ -226,7 +230,8 @@ xml:
         adjoint: 'RecursiveCheckpoint'
 
     dfx_euler_1e4_steps:
-      timestep: 0.0001
+      opt:
+        timestep: 0.0001
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
@@ -237,60 +242,78 @@ xml:
 
     # --- MJX native: Euler ---
     mjx_euler_1e-2_timestep:
-      timestep: 0.01
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
     mjx_euler_3e-3_timestep:
-      timestep: 0.003
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.003
     mjx_euler_1e-3_timestep:
-      timestep: 0.001
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001
     mjx_euler_3e-4_timestep:
-      timestep: 0.0003
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0003
     mjx_euler_1e-4_timestep:
-      timestep: 0.0001
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0001
     mjx_euler_3e-5_timestep:
-      timestep: 0.00003
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.00003
     mjx_euler_1e-5_timestep:
-      timestep: 0.00001
-      integrator: 'Euler'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.00001
 
     # --- MJX native: RK4 ---
     mjx_rk4_1e-1_timestep:
-      timestep: 0.1
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.1
     mjx_rk4_3e-2_timestep:
-      timestep: 0.03
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.03
     mjx_rk4_1e-2_timestep:
-      timestep: 0.01
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
     mjx_rk4_3e-3_timestep:
-      timestep: 0.003
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.003
     mjx_rk4_1e-3_timestep:
-      timestep: 0.001
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001
     mjx_rk4_3e-4_timestep:
-      timestep: 0.0003
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0003
     mjx_rk4_1e-4_timestep:
-      timestep: 0.0001
-      integrator: 'RK4'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0001
 
     # --- MJX native: Implicit ---
     mjx_implicit_1e-2_timestep:
-      timestep: 0.01
-      integrator: 'ImplicitFast'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.01
     mjx_implicit_3e-3_timestep:
-      timestep: 0.003
-      integrator: 'ImplicitFast'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.003
     mjx_implicit_1e-3_timestep:
-      timestep: 0.001
-      integrator: 'ImplicitFast'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.001
     mjx_implicit_3e-4_timestep:
-      timestep: 0.0003
-      integrator: 'ImplicitFast'
+      integrator: 'MJX'
+      opt:
+        timestep: 0.0003

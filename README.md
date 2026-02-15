@@ -1,14 +1,41 @@
-# diffmjx: Differentiable MuJoCo Simulations with Well-Defined Gradients
+# diffmjx: MuJoCo XLA with informative contact gradients
+
+[📄 Paper](www.link.com)  |  [🧑‍💻 Code](www.link.com)  |  [📚 Docs](www.link.com)
 
 MuJoCo's MJX backend enables GPU-accelerated, differentiable physics simulation in JAX.
-However, the gradients produced by MJX are often ill-defined: non-smooth contact dynamics
-introduce discontinuities, fixed-step integrators miss collision events, and several JAX
-primitives used internally are not differentiable.
+However, the gradients produced by MJX are often ill-defined as: 
+
+- **collision detection** resorts to non-differentiable operations, 
+
+- **contact solver** yield non-zero gradients only for colliding objects, 
+
+- **numerical integrators** using fixed stepsizes cause gradient oscillations due to discretization errors.
 
 **diffmjx** is an umbrella repository that integrates three libraries addressing each of
 these issues, enabling gradient-based optimization through rigid-body contact simulations.
 
-## Components
+
+## Components 
+
+### mujoco-mjx (fork)
+A fork of [MuJoCo XLA](https://github.com/google-deepmind/mujoco) implementing the following fixes:
+
+- **Contact Force from a Distance (CFD)**: Contact constraints apply miniscule forces even when no
+  contact is active, guiding the optimizer toward contact configurations. Straight-through estimation allows to use CFD forces only for gradient computation keeping the forward simulation untouched.
+
+- **`col_soft_enable`** — smoothly differentiable collision detection via [Softjax](#softjax), smoothing the collision detection pipeline.
+
+- **`scan_loop`** — replaces `jax.lax.while_loop` in the constraint solver with a scan-based loop.
+
+### mjx_diffrax
+Replaces MJX's built-in Euler and RK4 integrators with adaptive ODE solvers (Tsit5,
+Dopri5, and others) from [Diffrax](https://github.com/patrick-kidger/diffrax). Adaptive
+stepsize control improves gradient quality by reducing integration errors. Provides `step()` and `multistep()` entry points.
+
+
+> [!CAUTION]  
+> For long simulations, applying `jax.jit` (or alternatively `eqx.filter_jit`) on `multistep()` compiles the full simulation loop causing extreme compile times. 
+If you need gradients for long trajectories, only jit `step`.
 
 ### softjax
 
@@ -17,27 +44,7 @@ Smooth, differentiable drop-in replacements for non-differentiable JAX operation
 (smooth approximation), **hard** (original non-smooth op), and **straight-through
 estimation** (forward pass uses the hard op, backward pass uses the soft surrogate).
 
-[Documentation](https://a-paulus.github.io/softjax/)
-
-### mjx_diffrax
-
-Replaces MJX's built-in Euler and RK4 integrators with adaptive ODE solvers (Tsit5,
-Dopri5, and others) from [diffrax](https://github.com/patrick-kidger/diffrax). Adaptive
-stepping lets the solver detect and resolve collision events that fixed-step integrators
-miss. Provides `step()` and `multistep()` entry points.
-
-### mujoco-mjx (fork)
-
-A fork of [MuJoCo](https://github.com/google-deepmind/mujoco) with three additions to
-the MJX backend:
-
-- **Contact Force Distribution (CFD)** — provides non-zero gradient signal even when no
-  contact is active, guiding the optimizer toward contact configurations.
-- **`col_soft_enable`** — enables soft collision geometry via softjax, smoothing the
-  collision detection pipeline.
-- **`scan_loop`** — replaces `jax.lax.while_loop` in the constraint solver with a
-  scan-based loop, making the solver compatible with reverse-mode automatic
-  differentiation.
+[📄 Paper](www.link.com)  |  [🧑‍💻 Code](www.link.com)  |  [📚 Docs](www.link.com)
 
 ## Installation
 
