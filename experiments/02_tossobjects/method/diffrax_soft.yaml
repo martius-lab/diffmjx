@@ -1,0 +1,17 @@
+# @package _global_
+# Diffrax adaptive integration with smooth collision detection
+xml:
+  overwrite:
+    opt:
+      softjax_mode: 'smooth'
+      col_soft_enable: True
+
+diffrax:
+  solver: 'Tsit5'
+  stepsize_controller: 'PID'
+  pid_atol: 1e-8
+  pid_rtol: 1e-8
+  max_ode_steps: 4096
+  exact_quat_integration: true
+  recursive_ncheckpoints: 256
+  adjoint: 'RecursiveCheckpoint'

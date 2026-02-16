@@ -1,0 +1,11 @@
+# @package _global_
+# Standard MJX semi-implicit Euler integration (no diffrax)
+xml:
+  overwrite:
+    opt:
+      softjax_mode: 'hard'
+      col_soft_enable: False
+
+diffrax:
+  use_mjx: True
+  solver: null  # Use model's default integrator

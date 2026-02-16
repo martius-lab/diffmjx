@@ -14,7 +14,10 @@ jax.config.update("jax_disable_jit", False)
 
 # Add parent directory for local imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import cfg_to_flat_dct, plot_loss_grads, render_trajectory, upscale
+from utils import (
+    cfg_to_flat_dct, make_run_dir, plot_loss_grads,
+    render_trajectory, save_run_metadata, upscale,
+)
 
 import mujoco
 from mujoco import mjx
@@ -31,6 +34,12 @@ def main(cfg):
         omegaconf.OmegaConf.update(cfg, "simulation_time", 0.05)
     print(f"Starting run with parameters: \n{omegaconf.OmegaConf.to_yaml(cfg)}")
 
+    # Create timestamped results directory
+    descriptor = cfg.get("run_name", cfg.xml.system)
+    run_dir = make_run_dir(RESULTS_DIR, descriptor)
+    save_run_metadata(run_dir, cfg)
+    print(f"Results directory: {run_dir}")
+
     local_path = join(cfg.xml.path, cfg.xml.system + ".xml")
 
     mj_model = mujoco.MjModel.from_xml_path(local_path)
@@ -42,22 +51,18 @@ def main(cfg):
     d = mjx.make_data(m)
     d = jax.tree.map(upscale, d)  # Some versions of MJX do not upscale to float64
     d = d.replace(qpos=d.qpos.at[2].set(cfg.qz0), qvel=d.qvel.at[1].set(cfg.vy0))
-    
+
     u0s = jnp.linspace(cfg.u0_start, cfg.u0_end, cfg.u0_resolution)
 
-    diffrax_cfg = mjx_diffrax.DiffraxConfig(**cfg.diffrax)  # Set integration parameters for Diffrax
-
-    if cfg.diffrax.mjx_timestep is not None:
-        Nlength = int(cfg.simulation_time / cfg.diffrax.mjx_timestep)
-    else:
-        Nlength = int(cfg.simulation_time / m.opt.timestep)
+    diffrax_cfg = mjx_diffrax.DiffraxConfig(**cfg.diffrax)
+    Nlength = int(cfg.simulation_time / m.opt.timestep)
 
     # Render initial condition examples
     if cfg.render:
         for ui in [u0s[0], u0s[len(u0s) // 2], u0s[-1]]:
             d_i = d.replace(qvel=d.qvel.at[2].set(ui))
             _, traj_data = mjx_diffrax.multistep(m, d_i, nsteps=Nlength, cfg=diffrax_cfg, ctrls=None)
-            render_trajectory(traj=traj_data, m=mj_model, path=str(RESULTS_DIR), name=f"{cfg.xml.system}_toss_u0={float(ui):.2f}")
+            render_trajectory(traj=traj_data, m=mj_model, path=str(run_dir), name=f"{cfg.xml.system}_toss_u0={float(ui):.2f}")
 
 
     @eqx.filter_jit
@@ -69,7 +74,7 @@ def main(cfg):
         def cost(d):
             # Ball position in y-direction (aka throwing distance)
             return d.qpos[1]
-        
+
         return r_cost_weight * jnp.sum(jax.vmap(cost)(ds), axis=0) + cost(d)
 
 
@@ -81,9 +86,9 @@ def main(cfg):
         "u0s": u0s,
         "losses": losses,
         "grads": grads,
-    }).to_csv(RESULTS_DIR / f"{cfg.xml.system}.csv", index=False)
-    print(f"Data saved to {RESULTS_DIR / f'{cfg.xml.system}.csv'}")
-    plot_loss_grads(u0s, losses, grads, figpath=str(RESULTS_DIR / f"{cfg.xml.system}_loss"))
+    }).to_csv(run_dir / f"{cfg.xml.system}.csv", index=False)
+    print(f"Data saved to {run_dir / f'{cfg.xml.system}.csv'}")
+    plot_loss_grads(u0s, losses, grads, figpath=str(run_dir / f"{cfg.xml.system}_loss"))
 
 if __name__ == "__main__":
     main()

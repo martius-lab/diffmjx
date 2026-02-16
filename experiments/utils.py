@@ -1,8 +1,12 @@
+import subprocess
 import time
 from collections.abc import MutableMapping
+from datetime import datetime
 from os.path import join
-from omegaconf import OmegaConf
+from pathlib import Path
+
 from jax import Array
+from omegaconf import OmegaConf
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -76,6 +80,57 @@ def block_until_ready(x):
     import jax
 
     return jax.tree.map(lambda _x: _x.block_until_ready(), x)
+
+
+def make_run_dir(results_dir, descriptor=""):
+    """Create a timestamped subdirectory for a run."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    name = f"{timestamp}_{descriptor}" if descriptor else timestamp
+    run_dir = Path(results_dir) / name
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
+
+
+def _git_info(repo_path):
+    """Get git hash and diff for a repository."""
+    try:
+        hash_ = subprocess.check_output(
+            ["git", "-C", str(repo_path), "rev-parse", "HEAD"], stderr=subprocess.DEVNULL
+        ).decode().strip()
+        diff = subprocess.check_output(
+            ["git", "-C", str(repo_path), "diff"], stderr=subprocess.DEVNULL
+        ).decode()
+        return hash_, diff
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None, None
+
+
+def save_run_metadata(run_dir, cfg):
+    """Save config, git hashes, and diffs to the run directory."""
+    run_dir = Path(run_dir)
+    # Save resolved config
+    with open(run_dir / "config.yaml", "w") as f:
+        f.write(OmegaConf.to_yaml(cfg))
+
+    # Save git info for each relevant repo
+    experiment_dir = Path(__file__).parent
+    repos = {
+        "diffmjx": experiment_dir.parent,
+        "mujoco": experiment_dir.parent / "external" / "mujoco",
+        "mjx_diffrax": experiment_dir.parent / "external" / "mjx_diffrax",
+    }
+    with open(run_dir / "git_info.txt", "w") as f:
+        for name, path in repos.items():
+            hash_, diff = _git_info(path)
+            if hash_ is None:
+                continue
+            f.write(f"--- {name} ({path}) ---\n")
+            f.write(f"commit: {hash_}\n")
+            if diff:
+                f.write(f"diff:\n{diff}\n")
+            else:
+                f.write("diff: (clean)\n")
+            f.write("\n")
 
 
 def init_mjxmodel(mj_model, overwrite):
