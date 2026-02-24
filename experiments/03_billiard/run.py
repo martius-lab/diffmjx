@@ -190,7 +190,8 @@ def main(cfg):
     if m.mesh_convex == ():
         m = m.replace(mesh_convex=None)  # empty tuple breaks adjoint gradients in diffrax
     m = m.tree_replace(cfg_to_flat_dct(cfg.xml.overwrite))
-
+    mj_model.opt.timestep = float(m.opt.timestep)
+    
     d = mjx.make_data(m)
     d = jax.tree.map(upscale, d)
 
