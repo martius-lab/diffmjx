@@ -5,6 +5,7 @@ xml:
     opt:
       softjax_mode: 'smooth'
       col_soft_enable: True
+      col_softness: 0.1
 
 diffrax:
   solver: 'Tsit5'

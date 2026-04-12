@@ -22,7 +22,10 @@ jax.config.update("jax_disable_jit", False)
 
 # Add parent directory for local imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import cfg_to_flat_dct, plot_loss_grads, render_trajectory, upscale
+from utils import (
+    cfg_to_flat_dct, make_run_dir, plot_loss_grads,
+    render_trajectory, save_run_metadata, upscale,
+)
 
 import mujoco
 from mujoco import mjx
@@ -54,14 +57,14 @@ def loss(u0, m, d, Nlength, r_cost_weight, cfg_diffrax):
     return r_cost_weight * jnp.sum(jax.vmap(cost)(ds), axis=0) + cost(d)
 
 
-def render_u0(u0, m, d, mj_model, Nlength, evalname, camera, cfg_diffrax):
+def render_u0(u0, m, d, mj_model, Nlength, evalname, camera, cfg_diffrax, run_dir):
     """Visualisation for a single force."""
     qfrcs = make_qfrcs(u0, Nlength, m.nv)
     _, traj_data = mjx_diffrax.multistep(m, d, nsteps=Nlength, cfg=cfg_diffrax, qfrcs_applied=qfrcs)
     render_trajectory(
         traj=traj_data,
         m=mj_model,
-        path=str(RESULTS_DIR),
+        path=str(run_dir),
         name=evalname,
         camera=camera,
         reduce_video_size=True,
@@ -82,6 +85,7 @@ def train(
     qx1,
     camera,
     cfg_diffrax,
+    run_dir,
     render=True,
 ):
     # Initial conditions
@@ -98,6 +102,7 @@ def train(
             evalname=f"billiard_before_training_u0={u0}",
             camera=camera,
             cfg_diffrax=cfg_diffrax,
+            run_dir=run_dir,
         )
 
     # Gradient descent
@@ -132,6 +137,7 @@ def train(
             evalname=f"billiard_after_training_u0={u0_best}",
             camera=camera,
             cfg_diffrax=cfg_diffrax,
+            run_dir=run_dir,
         )
 
 
@@ -149,15 +155,16 @@ def analyze(
     qx1,
     camera,
     cfg_diffrax,
+    run_dir,
     render=True,
 ):
     d = d.replace(qpos=d.qpos.at[0].set(qx0).at[7].set(qx1))
     u0s = jnp.linspace(u0_min, u0_max, u0_resolution)
 
     if render:
-        render_u0(u0, m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0}", camera=camera, cfg_diffrax=cfg_diffrax)
-        render_u0(u0s[0], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[0]}", camera=camera, cfg_diffrax=cfg_diffrax)
-        render_u0(u0s[-1], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[-1]}", camera=camera, cfg_diffrax=cfg_diffrax)
+        render_u0(u0, m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0}", camera=camera, cfg_diffrax=cfg_diffrax, run_dir=run_dir)
+        render_u0(u0s[0], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[0]}", camera=camera, cfg_diffrax=cfg_diffrax, run_dir=run_dir)
+        render_u0(u0s[-1], m, d, mj_model, Nlength, evalname=f"billiard_analyze_u0={u0s[-1]}", camera=camera, cfg_diffrax=cfg_diffrax, run_dir=run_dir)
 
     loss_vmap = eqx.filter_vmap(loss, in_axes=(0, None, None, None, None, None))
     losses, grads = loss_vmap(u0s, m, d, Nlength, r_cost_weight, cfg_diffrax)
@@ -167,10 +174,10 @@ def analyze(
         "u0s": u0s,
         "losses": losses,
         "grads": grads,
-    }).to_csv(RESULTS_DIR / "billiard_analyze.csv", index=False)
-    print(f"Data saved to {RESULTS_DIR / 'billiard_analyze.csv'}")
+    }).to_csv(run_dir / "billiard_analyze.csv", index=False)
+    print(f"Data saved to {run_dir / 'billiard_analyze.csv'}")
 
-    plot_loss_grads(u0s, losses, grads, figpath=str(RESULTS_DIR / "billiard_analyze"))
+    plot_loss_grads(u0s, losses, grads, figpath=str(run_dir / "billiard_analyze"))
 
 
 @hydra.main(config_path=".", config_name="config", version_base="1.3")
@@ -180,6 +187,12 @@ def main(cfg):
         omegaconf.OmegaConf.update(cfg, "analyze.u0_resolution", 5)
         omegaconf.OmegaConf.update(cfg, "train.max_iter", 2)
     print(f"Starting run with parameters: \n{omegaconf.OmegaConf.to_yaml(cfg)}")
+
+    # Create timestamped results directory
+    descriptor = cfg.get("run_name", f"{cfg.xml.system}_{cfg.mode}")
+    run_dir = make_run_dir(RESULTS_DIR, descriptor)
+    save_run_metadata(run_dir, cfg)
+    print(f"Results directory: {run_dir}")
 
     local_path = join(cfg.xml.path, cfg.xml.system + ".xml")
 
@@ -198,9 +211,9 @@ def main(cfg):
     diffrax_cfg = mjx_diffrax.DiffraxConfig(**cfg.diffrax)
 
     if cfg.mode == "train":
-        train(m, d, mj_model, **cfg.train, **cfg.general, cfg_diffrax=diffrax_cfg, render=cfg.render)
+        train(m, d, mj_model, **cfg.train, **cfg.general, cfg_diffrax=diffrax_cfg, run_dir=run_dir, render=cfg.render)
     elif cfg.mode == "analyze":
-        analyze(m, d, mj_model, **cfg.analyze, **cfg.general, cfg_diffrax=diffrax_cfg, render=cfg.render)
+        analyze(m, d, mj_model, **cfg.analyze, **cfg.general, cfg_diffrax=diffrax_cfg, run_dir=run_dir, render=cfg.render)
 
 
 if __name__ == "__main__":
