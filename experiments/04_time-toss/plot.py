@@ -61,7 +61,7 @@ def main():
     group_labels = {group: settings_dct[group][1] for group in groups_unique}
     group_markers = {group: settings_dct[group][2] for group in groups_unique}
 
-    reference_setting = "dfx_tsit5_1e-10_tol"
+    reference_setting = "dfx_tsit5backsolve_1e-10_tol"
     if reference_setting not in df.index:
         print(f"Reference setting '{reference_setting}' not found in data.")
         return

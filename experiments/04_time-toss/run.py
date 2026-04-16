@@ -129,11 +129,6 @@ def main(cfg):
             settings = settings[:1]
 
         for setting_name, setting in settings:
-            # Skip MJX-native settings (not supported by mjx_diffrax)
-            if setting.get("integrator") == "MJX":
-                print(f"Skipping MJX-native setting: {setting_name}")
-                continue
-
             if setting_name in df.index and not cfg.force_overwrite:
                 print(f"Skipping {setting_name}: already in results")
                 continue
@@ -146,7 +141,7 @@ def main(cfg):
             overwrite_config = cfg_to_flat_dct(cfg.xml.overwrite)
             # Apply per-setting opt overwrites if present
             if "opt" in setting:
-                overwrite_config.update(cfg_to_flat_dct(setting.opt))
+                overwrite_config.update({f"opt.{k}": v for k, v in cfg_to_flat_dct(setting.opt).items()})
             m = m.tree_replace(overwrite_config)
 
             cfg_diffrax = mjx_diffrax.DiffraxConfig(**setting.diffrax)
