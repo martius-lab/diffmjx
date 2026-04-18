@@ -15,4 +15,4 @@ diffrax:
   max_ode_steps: 4096
   exact_quat_integration: false
   recursive_ncheckpoints: 256
-  adjoint: 'RecursiveCheckpoint'
+  adjoint: 'Backsolve'
