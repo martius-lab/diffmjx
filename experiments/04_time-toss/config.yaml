@@ -3,9 +3,9 @@ defaults:
 
 quick: false
 render: true
-u0s: [-2.0]
+u0s: [-2.0]  # Initial velocity of object.
 systems: ['cube']
-force_overwrite: True
+force_overwrite: True  # Overwrite results and logs if they already exist.
 
 analyze:
   camera: track
@@ -26,13 +26,35 @@ xml:
       impratio: 1.0
 
       col_soft_enable: True
+      col_softness: 0.1
       softjax_mode: 'smooth'  # 'c1', 'c2', 'c4', 'smooth'
-      cfd_enable: True
+      cfd_enable: False
       cfd_solimp: [0.0, 0.01, 0.05, 1.0, 2.0]
       scan_loop: True  # Use scan in contact solver.
 
   overwrite_settings:
+    # Backsolve computes accurate gradients but is very slow, 
+    # used as ground truth for gradient error analysis.
+    dfx_tsit5backsolve_1e-10_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: false
+        pid_atol: 1e-10
+        pid_rtol: 1e-10
+        adjoint: 'Backsolve'
     # --- Diffrax adaptive: Tsit5 + PID at varying tolerances ---
+    dfx_tsit5_1e-12_tol:
+      diffrax:
+        solver: 'Tsit5'
+        stepsize_controller: 'PID'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        pid_atol: 1e-12
+        pid_rtol: 1e-12
+        adjoint: 'RecursiveCheckpoint'
     dfx_tsit5_1e-10_tol:
       diffrax:
         solver: 'Tsit5'
@@ -207,113 +229,161 @@ xml:
         adjoint: 'RecursiveCheckpoint'
 
     # --- Diffrax Euler constant step ---
-    dfx_euler_1e3_steps:
+    dfx_euler_1e-2_steps:
+      opt:
+        timestep: 0.01
+      diffrax:
+        solver: 'Euler'
+        stepsize_controller: 'Constant'
+        max_ode_steps: 10000
+        exact_quat_integration: true
+        recursive_ncheckpoints: null
+        adjoint: 'RecursiveCheckpoint'
+
+    dfx_euler_1e-3_steps:
       opt:
         timestep: 0.001
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
-        max_ode_steps: null
+        max_ode_steps: 10000
         exact_quat_integration: true
         recursive_ncheckpoints: null
         adjoint: 'RecursiveCheckpoint'
 
-    dfx_euler_3e3_steps:
+    dfx_euler_3e-3_steps:
       opt:
         timestep: 0.003
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
-        max_ode_steps: null
+        max_ode_steps: 10000
         exact_quat_integration: true
         recursive_ncheckpoints: null
         adjoint: 'RecursiveCheckpoint'
 
-    dfx_euler_1e4_steps:
+    dfx_euler_1e-4_steps:
       opt:
         timestep: 0.0001
       diffrax:
         solver: 'Euler'
         stepsize_controller: 'Constant'
-        max_ode_steps: null
+        max_ode_steps: 10000
         exact_quat_integration: true
         recursive_ncheckpoints: null
         adjoint: 'RecursiveCheckpoint'
 
     # --- MJX native: Euler ---
     mjx_euler_1e-2_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.01
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
     mjx_euler_3e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.003
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
     mjx_euler_1e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.001
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
     mjx_euler_3e-4_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.0003
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
     mjx_euler_1e-4_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.0001
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
     mjx_euler_3e-5_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.00003
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
+
     mjx_euler_1e-5_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.00001
+      diffrax:
+        use_mjx: True
+        solver: 'Euler'
 
     # --- MJX native: RK4 ---
     mjx_rk4_1e-1_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.1
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_3e-2_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.03
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_1e-2_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.01
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_3e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.003
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_1e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.001
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_3e-4_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.0003
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
     mjx_rk4_1e-4_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.0001
+      diffrax:
+        use_mjx: True
+        solver: 'RK4'
 
-    # --- MJX native: Implicit ---
+    # # --- MJX native: Implicit ---
     mjx_implicit_1e-2_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.01
+      diffrax:
+        use_mjx: True
+        solver: 'ImplicitFast'
     mjx_implicit_3e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.003
+      diffrax:
+        use_mjx: True
+        solver: 'ImplicitFast'
     mjx_implicit_1e-3_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.001
+      diffrax:
+        use_mjx: True
+        solver: 'ImplicitFast'
     mjx_implicit_3e-4_timestep:
-      integrator: 'MJX'
       opt:
         timestep: 0.0003
+      diffrax:
+        use_mjx: True
+        solver: 'ImplicitFast'

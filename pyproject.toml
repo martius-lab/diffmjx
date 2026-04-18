@@ -34,7 +34,6 @@ gpu = [
 dev = ["pytest", "ruff"]
 
 [tool.uv.sources]
-softjax = { path = "./external/softjax", editable = true }
 mujoco-mjx = { path = "./external/mujoco/mjx", editable = true }
 mjx-diffrax = { path = "./external/mjx_diffrax", editable = true }
 

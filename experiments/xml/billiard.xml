@@ -34,18 +34,10 @@
         <!-- Cue Ball with Rolling Marker (Red & White Checker) -->
         <texture name="cue_ball" type="cube" builtin="flat" mark="cross" width="64" height="64" rgb1="0.9 0.9 0.9" rgb2="0.9 0.9 0.9" markrgb="0. 0. 0."/>
         <material name="cue_ball" texture="cue_ball" texuniform="true" rgba="1 1 1 1." reflectance="0.7"/>
-        <!--
-        <texture name="cue_ball" type="2d" builtin="checker" rgb1="1 1 1" rgb2="0.8 0.8 0.8" width="64" height="64"/>
-        <material name="cue_ball" texture="cue_ball" texuniform="true" specular="0.8" shininess="1.0" rgba="1 1 1 1"/>
-        -->
-
+        
         <!-- Eight Ball with Stripe (Black & White Checker) -->
         <texture name="eight_ball" type="cube" builtin="flat" mark="cross" width="64" height="64" rgb1="0.1 0.1 0.1" rgb2="0.1 0.1 0.1" markrgb="1 1 1"/>
         <material name="eight_ball" texture="eight_ball" texuniform="true" rgba="1 1 1 1."/>
-        <!--
-        <texture name="eight_ball" type="2d" builtin="checker" rgb1="0.1 0.1 0.1" rgb2="1 1 1" width="64" height="32"/>
-        <material name="eight_ball" texture="eight_ball" texuniform="true" specular="0.8" shininess="1.0" rgba="0.1 0.1 0.1 1"/>
-        -->
     </asset>
 
     <worldbody>

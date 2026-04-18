@@ -36,14 +36,14 @@ xml:
       cfd_enable: True # general switch for disabling any modification.
       col_soft_enable: False
       softjax_mode: 'smooth' # 'c1', 'c2', 'c4', 'smooth' - Mode for soft surrogates in collision detection.
-      cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0]
+      cfd_solimp: [0.0, 0.01, 0.1, 1.0, 2.0] # (d_0​, d_{width}​, width, midpoint, power)
       scan_loop: True
 
 diffrax:
   solver: 'Tsit5'
   stepsize_controller: 'PID'
-  pid_atol: 1e-4
-  pid_rtol: 1e-4
+  pid_atol: 1e-6
+  pid_rtol: 1e-6
   max_ode_steps: 4096
   exact_quat_integration: true
   adjoint: 'RecursiveCheckpoint'
