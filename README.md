@@ -3,8 +3,7 @@
 
 [![arXiv paper](https://img.shields.io/badge/arXiv-paper-salmon)](https://arxiv.org/abs/2506.14186)
 
-MuJoCo's MJX backend enables GPU-accelerated, differentiable physics simulation in JAX.
-However, the gradients produced by MJX are often erroneous, as: 
+MuJoCo's MJX backend enables GPU-accelerated, differentiable physics simulation in JAX. The gradients produced by MJX can be erroneous, as: 
 
 - **collision detection** may use non-differentiable operations, 
 
@@ -12,7 +11,11 @@ However, the gradients produced by MJX are often erroneous, as:
 
 - **numerical integrators** with fixed stepsizes cause gradient oscillations due to discretization errors.
 
-**diffmjx** is an umbrella repository that integrates three libraries each of which addresses one of the above issues, enabling gradient-based optimization through rigid-body contact simulations.
+**diffmjx** integrates several libraries to address the above issues, enabling gradient-based optimization through rigid-body contact simulations.
+
+> [!NOTE]  
+> The compilation of MJX gradient functions is notoriously slow and becomes **even slower when adding adaptive integration**. We are investigating how to speed up compilation, but at the current point be warned that developing algorithms which rely on MJX's autodiff gradient computation could take more time than anticipated.
+
 
 ## Libraries
 
@@ -38,11 +41,7 @@ A fork of [MuJoCo XLA](https://github.com/google-deepmind/mujoco) implementing t
 
 Replaces MJX's built-in Euler and RK4 integrators with adaptive ODE solvers (Tsit5,
 Dopri5, and others) from [Diffrax](https://github.com/patrick-kidger/diffrax). Adaptive
-stepsize control improves gradient quality by reducing integration errors. Provides `step()` and `multistep()` entry points.
-
-
-> [!NOTE]  
-> For long simulations, applying `jax.jit` (or alternatively `eqx.filter_jit`) on `multistep()` compiles the full simulation loop causing extreme compile times.
+stepsize control improves gradient quality by reducing integration errors. Provides `step()` and `multistep()` functions that also allow to run MJX's native integrators. 
 
 ### softjax
 [![Github repo](https://img.shields.io/badge/Github-repo-blue)](https://github.com/a-paulus/softjax)
@@ -79,15 +78,13 @@ Run an experiment with:
 uv run experiments/<experiment>/run.py
 ```
 
-| Directory | Description |
+| `<experiment>` | Description |
 |---|---|
-| `exp_01_diffrax_toyexample` | 1-D bouncing ball comparing Euler, ideal, and adaptive integration |
-| `exp_02_diffrax_tossobjects` | Object tossing with adaptive diffrax integration in MJX |
-| `exp_03_cfd_billiard` | Billiard optimization using Contact Force Distribution gradients |
-| `exp_04_optimize-then-discretize` | WIP |
-| `exp_05_diffrax_time-toss` | WIP |
+| `01_toyexample` | 1-D points mass toy example showing effect of stepsize on simulator gradients |
+| `02_tossobjects` | Show effect of adaptive integration on gradient computation |
+| `03_billiard` | Billiard balls collide, show effect of CFD on gradient computation |
+| `04_time-toss` | Compare compilation times and gradient computation times for a cube toss simulation |
 
-See `experiments/` for full working examples.
 
 ## License
 
