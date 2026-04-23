@@ -2,6 +2,7 @@
 
 
 [![arXiv paper](https://img.shields.io/badge/arXiv-paper-salmon)](https://arxiv.org/abs/2506.14186)
+[![project page](https://img.shields.io/badge/project-page-blue)](https://sites.google.com/view/diffmjx)
 
 MuJoCo's MJX backend enables GPU-accelerated, differentiable physics simulation in JAX. The gradients produced by MJX can be erroneous, as: 
 
