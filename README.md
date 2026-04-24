@@ -26,7 +26,7 @@ MuJoCo's MJX backend enables GPU-accelerated, differentiable physics simulation 
 
 ### mujoco-mjx (fork)
 
-[![Github repo](https://img.shields.io/badge/Github-repo-blue)](https://github.com/a-paulus/mujoco)
+[![Github repo](https://img.shields.io/badge/Github-repo-blue)](https://github.com/martius-lab/mujoco)
 
 A fork of [MuJoCo XLA](https://github.com/google-deepmind/mujoco) implementing the following features:
 
