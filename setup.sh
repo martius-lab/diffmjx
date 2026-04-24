@@ -29,14 +29,14 @@ if [ -d "$EXTERNAL_DIR/softjax" ]; then
     echo "softjax already cloned"
 else
     echo "Cloning softjax..."
-    git clone git@github.com:a-paulus/softjax_private.git "$EXTERNAL_DIR/softjax"
+    git clone git@github.com:a-paulus/softjax.git "$EXTERNAL_DIR/softjax"
 fi
 
 if [ -d "$EXTERNAL_DIR/mujoco" ]; then
     echo "mujoco already cloned"
 else
     echo "Cloning mujoco..."
-    git clone git@github.com:a-paulus/mujoco.git "$EXTERNAL_DIR/mujoco"
+    git clone -b diffmjx git@github.com:martius-lab/mujoco.git "$EXTERNAL_DIR/mujoco"
 fi
 
 if [ -d "$EXTERNAL_DIR/mjx_diffrax" ]; then
