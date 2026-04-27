@@ -43,7 +43,7 @@ if [ -d "$EXTERNAL_DIR/mjx_diffrax" ]; then
     echo "mjx_diffrax already cloned"
 else
     echo "Cloning mjx_diffrax..."
-    git clone git@github.com:a-paulus/mjx_diffrax.git "$EXTERNAL_DIR/mjx_diffrax"
+    git clone git@github.com:martius-lab/mjx_diffrax.git "$EXTERNAL_DIR/mjx_diffrax"
 fi
 
 echo ""
