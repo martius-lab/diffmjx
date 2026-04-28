@@ -38,7 +38,7 @@ A fork of [MuJoCo XLA](https://github.com/google-deepmind/mujoco) implementing t
 - **`scan_loop`** — replaces `jax.lax.while_loop` in the constraint solver with a scan-based loop.
 
 ### mjx_diffrax
-[![Github repo](https://img.shields.io/badge/Github-repo-blue)](https://github.com/a-paulus/mjx_diffrax)
+[![Github repo](https://img.shields.io/badge/Github-repo-blue)](https://github.com/martius-lab/mjx_diffrax)
 
 Replaces MJX's built-in Euler and RK4 integrators with adaptive ODE solvers (Tsit5,
 Dopri5, and others) from [Diffrax](https://github.com/patrick-kidger/diffrax). Adaptive
